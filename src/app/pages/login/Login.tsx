@@ -16,8 +16,18 @@ import TextFieldCustom from "@/app/components/BasicTextField";
 export const Login: React.FC = () => {
   const [username, setUser] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const user = await Parse.User.logIn(username, password);
+      console.log("Usuário autenticado:", user);
+      navigate("/inicio");
+    } catch (err) {
+      setError("Falha no login. Verifique suas credenciais.");
+    }
+  };
   const [showPassword, setShowPassword] = useState(false);
   const handleClickShowPassword = () => setShowPassword((show) => !show);
   const handleMouseDownPassword = (
@@ -29,17 +39,6 @@ export const Login: React.FC = () => {
     event: React.MouseEvent<HTMLButtonElement>
   ) => {
     event.preventDefault();
-  };
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      const user = await Parse.User.logIn(username, password);
-      console.log("Usuário autenticado:", user);
-      navigate("/inicio");
-    } catch (err) {
-      setError("Falha no login. Verifique suas credenciais.");
-    }
   };
 
   return (
@@ -66,6 +65,7 @@ export const Login: React.FC = () => {
               <OutlinedInput
                 id="outlined-adornment-password"
                 type={showPassword ? "text" : "password"}
+                onChange={(e) => setPassword(e.target.value)}
                 endAdornment={
                   <InputAdornment position="end">
                     <IconButton
