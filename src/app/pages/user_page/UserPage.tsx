@@ -1,4 +1,5 @@
-import { useState } from "react";
+import Parse from 'parse/dist/parse.min.js';
+import { useState, useEffect } from "react";
 import {
   Table,
   TableHead,
@@ -14,58 +15,62 @@ import {
   Badge,
 } from "@mui/material";
 
-export const UserPager:React.FC = () => {
+export const UserPager: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortColumn, setSortColumn] = useState<keyof typeof users[0]>("name");
+  const [sortColumn, setSortColumn] = useState<keyof typeof pets[0]>("nomePet");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [pets, setPets] = useState<any[]>([]);
 
-  const users = [
-    {
-      id: 1,
-      name: "John Doe",
-      email: "john@example.com",
-      role: "Admin",
-      status: "Active",
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      email: "jane@example.com",
-      role: "User",
-      status: "Inactive",
-    },
-    {
-      id: 3,
-      name: "Bob Johnson",
-      email: "bob@example.com",
-      role: "Editor",
-      status: "Active",
-    },
-    {
-      id: 4,
-      name: "Sarah Lee",
-      email: "sarah@example.com",
-      role: "User",
-      status: "Active",
-    },
-    {
-      id: 5,
-      name: "Michael Brown",
-      email: "michael@example.com",
-      role: "Admin",
-      status: "Inactive",
-    },
-  ];
+  useEffect(() => {
+    const fetchPets = async () => {
+      try {
+        const petsList = await getPetsByUser();
+        setPets(petsList);
+      } catch (error) {
+        console.error('Erro ao buscar pets:', error);
+      }
+    };
 
-  const filteredUsers = users.filter(
-    (user) =>
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.status.toLowerCase().includes(searchTerm.toLowerCase())
+    fetchPets();
+  }, []);
+
+  const getPetsByUser = async () => {
+    const currentUser = Parse.User.current();
+    
+    if (!currentUser) {
+      throw new Error('Usuário não autenticado.');
+    }
+  
+    const Pet = Parse.Object.extend('Pet');
+    const query = new Parse.Query(Pet);
+  
+    query.equalTo('userObjectId', currentUser);
+  
+    try {
+      const results = await query.find();
+      return results.map(pet => ({
+        id: pet.id,
+        nomePet: pet.get('nomePet') || '',
+        idadePet: pet.get('idadePet') || '',
+        especiePet: pet.get('especiePet') || '',
+        racaPet: pet.get('racaPet') || '',
+        pesoPet: pet.get('pesoPet') || '',
+        dataNascimentoPet: pet.get('dataNascimentoPet') || '',
+        sexoPet: pet.get('sexoPet') || '',
+      }));
+    } catch (err) {
+      throw new Error(`Erro ao buscar pets: ${err.message}`);
+    }
+  };
+
+  const filteredPets = pets.filter(
+    (pet) =>
+      pet.nomePet.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      pet.especiePet.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      pet.racaPet.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const sortedUsers = filteredUsers.sort((a, b) => {
+  const sortedPets = filteredPets.sort((a, b) => {
     if (a[sortColumn] < b[sortColumn]) return sortDirection === "asc" ? -1 : 1;
     if (a[sortColumn] > b[sortColumn]) return sortDirection === "asc" ? 1 : -1;
     return 0;
@@ -75,7 +80,7 @@ export const UserPager:React.FC = () => {
     setSearchTerm(e.target.value);
   };
 
-  const handleSort = (column: keyof typeof users[0]) => {
+  const handleSort = (column: keyof typeof pets[0]) => {
     const isAsc = sortColumn === column && sortDirection === "asc";
     setSortDirection(isAsc ? "desc" : "asc");
     setSortColumn(column);
@@ -85,16 +90,16 @@ export const UserPager:React.FC = () => {
     <div className="container mx-auto px-4 md:px-6 py-8">
       <div className="flex items-center justify-between mb-6">
         <Typography variant="h4" component="h1">
-          Users
+          Pets Registrados
         </Typography>
         <Button href='/cadastroPet' variant="contained" color="primary">
-          Add Pet
+          Registrar Pet
         </Button>
       </div>
       <TableContainer component={Paper}>
         <div className="p-4">
           <Input
-            placeholder="Search users..."
+            placeholder="Search pets..."
             value={searchTerm}
             onChange={handleSearch}
             fullWidth
@@ -105,58 +110,58 @@ export const UserPager:React.FC = () => {
             <TableRow>
               <TableCell>
                 <TableSortLabel
-                  active={sortColumn === "name"}
-                  direction={sortColumn === "name" ? sortDirection : "asc"}
-                  onClick={() => handleSort("name")}
+                  active={sortColumn === "nomePet"}
+                  direction={sortColumn === "nomePet" ? sortDirection : "asc"}
+                  onClick={() => handleSort("nomePet")}
                 >
-                  Name
+                  Nome
                 </TableSortLabel>
               </TableCell>
               <TableCell>
                 <TableSortLabel
-                  active={sortColumn === "email"}
-                  direction={sortColumn === "email" ? sortDirection : "asc"}
-                  onClick={() => handleSort("email")}
+                  active={sortColumn === "especiePet"}
+                  direction={sortColumn === "especiePet" ? sortDirection : "asc"}
+                  onClick={() => handleSort("especiePet")}
                 >
-                  Email
+                  Espécie
                 </TableSortLabel>
               </TableCell>
               <TableCell>
                 <TableSortLabel
-                  active={sortColumn === "role"}
-                  direction={sortColumn === "role" ? sortDirection : "asc"}
-                  onClick={() => handleSort("role")}
+                  active={sortColumn === "racaPet"}
+                  direction={sortColumn === "racaPet" ? sortDirection : "asc"}
+                  onClick={() => handleSort("racaPet")}
                 >
-                  Role
+                  Raça
                 </TableSortLabel>
               </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={sortColumn === "status"}
-                  direction={sortColumn === "status" ? sortDirection : "asc"}
-                  onClick={() => handleSort("status")}
-                >
-                  Status
-                </TableSortLabel>
-              </TableCell>
+              <TableCell>Peso</TableCell>
+              <TableCell>Data de Nascimento</TableCell>
+              <TableCell>Sexo</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {sortedUsers.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell>{user.name}</TableCell>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>
-                  <Badge badgeContent={user.role} color="primary" />
-                </TableCell>
-                <TableCell>
-                  <Badge badgeContent={user.status} color="secondary" />
+            {sortedPets.length > 0 ? (
+              sortedPets.map((pet) => (
+                <TableRow key={pet.id}>
+                  <TableCell>{pet.nomePet}</TableCell>
+                  <TableCell>{pet.especiePet}</TableCell>
+                  <TableCell>{pet.racaPet}</TableCell>
+                  <TableCell>{pet.pesoPet}</TableCell>
+                  <TableCell>{pet.dataNascimentoPet?.toLocaleDateString()}</TableCell>
+                  <TableCell>{pet.sexoPet}</TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={6} align="center">
+                  Nenhum pet encontrado.
                 </TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
       </TableContainer>
     </div>
   );
-}
+};

@@ -23,7 +23,7 @@ export const Login: React.FC = () => {
     try {
       const user = await Parse.User.logIn(username, password);
       console.log("Usuário autenticado:", user);
-      navigate("/inicio");
+      navigate("/gerenciamento");
     } catch (err) {
       setError("Falha no login. Verifique suas credenciais.");
     }
