@@ -21,10 +21,10 @@ import MenuIcon from "@mui/icons-material/Menu";
 
 export const UserPager: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortColumn, setSortColumn] =
-    useState<keyof (typeof pets)[0]>("nomePet");
+  const [sortColumn, setSortColumn] = useState<keyof (typeof pets)[0]>("nomePet");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [pets, setPets] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPets = async () => {
@@ -66,7 +66,7 @@ export const UserPager: React.FC = () => {
         sexoPet: pet.get("sexoPet") || "",
       }));
     } catch (err) {
-      throw new Error(`Erro ao buscar pets: ${err.message}`);
+      throw new Error(`Erro ao buscar pets:`);
     }
   };
   {/*Filtra os registros considerando alguns atributos, a partir da digitação com tratativa para converter a string para LowerCase */}
