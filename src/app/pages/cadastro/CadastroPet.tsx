@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import Parse from 'parse/dist/parse.min.js';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 export const CadastroPet: React.FC = () => {
-  const [nomePet, setNome] = useState('');
+  const [nomePet, setNomePet] = useState('');
   const [idade, setIdade] = useState<number | undefined>(undefined);
   const [especie, setEspecie] = useState('');
   const [raca, setRaca] = useState('');
   const [peso, setPeso] = useState<number | undefined>(undefined);
   const [dataNascimento, setDataNascimento] = useState('');
   const [sexo, setSexo] = useState('');
+  const navigate = useNavigate();
   {/*const [foto, setFoto] = useState<File | null>(null);
   const [vacinas, setVacinas] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);*/}
@@ -44,6 +46,7 @@ export const CadastroPet: React.FC = () => {
     try {
       await Pet.save();
       alert('Pet cadastrado com sucesso!');
+      navigate("/gerenciamento");
     } catch (err) {
       if (err instanceof Error) {
         alert(`Erro ao cadastrar pet: ${err.message}`);
@@ -68,7 +71,7 @@ export const CadastroPet: React.FC = () => {
         <input
           type="text"
           value={nomePet}
-          onChange={(e) => setNome(e.target.value)}
+          onChange={(e) => setNomePet(e.target.value)}
           className="w-full p-2 border border-gray-300 rounded"
         />
       </div>
