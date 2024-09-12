@@ -12,8 +12,6 @@ import {
   Input,
   Typography,
   Button,
-  Badge,
-  Link,
   Box,
   AppBar,
   Toolbar,
@@ -41,18 +39,20 @@ export const UserPager: React.FC = () => {
     fetchPets();
   }, []);
 
+  {/*Função que executa a Query no servidor do Back4App para obter os registros do usuário logado */}
   const getPetsByUser = async () => {
     const currentUser = Parse.User.current();
 
     if (!currentUser) {
-      throw new Error("Usuário não autenticado.");
+      throw new Error("Usuário não autenticado!");
     }
 
     const Pet = Parse.Object.extend("Pet");
     const query = new Parse.Query(Pet);
 
-    query.equalTo("userObjectId", currentUser);
+    query.equalTo("userObjectId", currentUser); //Faz a consulta através do userObjectId criado no Back4App como relacionamento entre tabelas 1:N, onde da tabela Pet possui o atributo userObjectId que refere-se ao userObjectId da tabela _User
 
+    {/*Armazenamento da consulta nos atributos para exposição na tabela*/}
     try {
       const results = await query.find();
       return results.map((pet) => ({
@@ -69,7 +69,7 @@ export const UserPager: React.FC = () => {
       throw new Error(`Erro ao buscar pets: ${err.message}`);
     }
   };
-
+  {/*Filtra os registros considerando alguns atributos, a partir da digitação com tratativa para converter a string para LowerCase */}
   const filteredPets = pets.filter(
     (pet) =>
       pet.nomePet.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -77,6 +77,7 @@ export const UserPager: React.FC = () => {
       pet.racaPet.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  {/*Lógica já disponibilizada pela MUI5, apenas ajustado para contemplar as demais 'variáveis' do compnente UserPage.tsx */}
   const sortedPets = filteredPets.sort((a, b) => {
     if (a[sortColumn] < b[sortColumn]) return sortDirection === "asc" ? -1 : 1;
     if (a[sortColumn] > b[sortColumn]) return sortDirection === "asc" ? 1 : -1;
@@ -87,6 +88,7 @@ export const UserPager: React.FC = () => {
     setSearchTerm(e.target.value);
   };
 
+  {/*Lógica já disponibilizada pela MUI5, apenas ajustado para contemplar as demais 'variáveis' do compnente UserPage.tsx */}
   const handleSort = (column: keyof (typeof pets)[0]) => {
     const isAsc = sortColumn === column && sortDirection === "asc";
     setSortDirection(isAsc ? "desc" : "asc");
@@ -135,7 +137,7 @@ export const UserPager: React.FC = () => {
         <TableContainer component={Paper}>
           <div className="p-4">
             <Input
-              placeholder="Search pets..."
+              placeholder="Localizar pet"
               value={searchTerm}
               onChange={handleSearch}
               fullWidth
