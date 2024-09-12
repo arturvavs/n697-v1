@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Parse from "parse/dist/parse.min.js";
 import {
   FormControl,
@@ -11,23 +11,26 @@ import {
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import TextFieldCustom from "@/app/components/BasicTextField";
 
 export const Login: React.FC = () => {
-  const [username, setUser] = useState("");
+
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  {/*handleLogin: função simples que realiza o login na aplicação, validando através do Parse.User.logIn o usuário e senha cadastradas na tabela _User do Back4App */}
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const user = await Parse.User.logIn(username, password);
       console.log("Usuário autenticado:", user);
-      navigate("/inicio");
+      navigate("/gerenciamento");
     } catch (err) {
       setError("Falha no login. Verifique suas credenciais.");
     }
   };
+
+  {/*Bloco de instruções para funcionalidade do icone de exibir/ocultar a senha escrita no campo. Essa função já vem nativamente pronta do MUI5, apenas fiz alguns ajustes para adequard a lógica do componente Login.tsx */}
   const [showPassword, setShowPassword] = useState(false);
   const handleClickShowPassword = () => setShowPassword((show) => !show);
   const handleMouseDownPassword = (
@@ -48,34 +51,34 @@ export const Login: React.FC = () => {
         {error && <p>{error}</p>}
         <form>
           <div className="mb-4">
-            <TextField
+            <TextField //Componente importado da MUI5
               required
               fullWidth
               id="outlined-required"
               label="Usuário"
               value={username}
-              onChange={(e) => setUser(e.target.value)}
+              onChange={(e) => setUsername(e.target.value)}
             />
           </div>
           <div className="mb-6">
-            <FormControl variant="outlined" fullWidth>
-              <InputLabel htmlFor="outlined-adornment-password">
+            <FormControl variant="outlined" fullWidth> {/*Componente importado da MUI5 */}
+              <InputLabel htmlFor="outlined-adornment-password"> {/*Componente importado da MUI5 */}
                 Senha *
               </InputLabel>
-              <OutlinedInput
+              <OutlinedInput //Componente importado da MUI5 
                 id="outlined-adornment-password"
                 type={showPassword ? "text" : "password"}
                 onChange={(e) => setPassword(e.target.value)}
                 endAdornment={
-                  <InputAdornment position="end">
-                    <IconButton
+                  <InputAdornment position="end"> {/*Componente importado da MUI5 */}
+                    <IconButton //Componente improtado da MUI5
                       aria-label="toggle password visibility"
                       onClick={handleClickShowPassword}
                       onMouseDown={handleMouseDownPassword}
                       onMouseUp={handleMouseUpPassword}
                       edge="end"
                     >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                      {showPassword ? <VisibilityOff /> : <Visibility />} {/*Aplicação da funcionalidade de exibição de senha, nativamente importada da MUI5*/}
                     </IconButton>
                   </InputAdornment>
                 }

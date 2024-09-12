@@ -2,49 +2,57 @@ import React, { useState } from 'react';
 import Parse from 'parse/dist/parse.min.js';
 
 export const CadastroPet: React.FC = () => {
-  const [nome, setNome] = useState('');
+  const [nomePet, setNome] = useState('');
   const [idade, setIdade] = useState<number | undefined>(undefined);
   const [especie, setEspecie] = useState('');
   const [raca, setRaca] = useState('');
   const [peso, setPeso] = useState<number | undefined>(undefined);
   const [dataNascimento, setDataNascimento] = useState('');
   const [sexo, setSexo] = useState('');
-  const [foto, setFoto] = useState<File | null>(null);
+  {/*const [foto, setFoto] = useState<File | null>(null);
   const [vacinas, setVacinas] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);*/}
 
   const handleCadastro = async () => {
     const Pet = new Parse.Object('Pet');
-    
-    const [error, setError] = useState<string | null>(null);
-    
-    Pet.set('nome', nome);
-    Pet.set('idade', idade);
-    Pet.set('especie', especie);
-    Pet.set('raca', raca);
-    Pet.set('peso', peso);
-    Pet.set('dataNascimento', dataNascimento ? new Date(dataNascimento) : undefined);
-    Pet.set('sexo', sexo);
-    Pet.set('dono', Parse.User.current());
+    Pet.set('nomePet', nomePet);
+    Pet.set('idadePet', idade);
+    Pet.set('escpeciePet', especie);
+    Pet.set('racaPet', raca);
+    Pet.set('pesoPet', peso);
+    Pet.set('dataNascimentoPet', dataNascimento ? new Date(dataNascimento) : undefined);
+    Pet.set('sexoPet', sexo);
 
-    if (foto) {
+    {/*if (foto) {
       const parseFile = new Parse.File(foto.name, foto);
       await parseFile.save();
       Pet.set('foto', parseFile);
     }
 
-    Pet.set('vacinas', vacinas);
+    Pet.set('vacinas', vacinas);*/}
+
+    const currentUser = Parse.User.current();
+    if (currentUser) {
+      // Faço a relação entre a tabela Pet > _User
+      const relation = Pet.relation('userObjectId');
+      relation.add(currentUser);
+    } else {
+      alert('Usuário não autenticado.');
+      return;
+    }
 
     try {
       await Pet.save();
       alert('Pet cadastrado com sucesso!');
     } catch (err) {
-      alert(`Erro ao cadastrar pet:`);
+      alert(`Erro ao cadastrar pet: ${err.message}`);
+      console.log(Parse.User.current())
     }
   };
 
-  const handleAddVacina = (vacina: string) => {
+  {/*const handleAddVacina = (vacina: string) => {
     setVacinas([...vacinas, vacina]);
-  };
+  };*/}
 
   return (
     <div className="max-w-md mx-auto p-4">
@@ -54,7 +62,7 @@ export const CadastroPet: React.FC = () => {
         <label className="block text-sm font-medium mb-1">Nome:</label>
         <input
           type="text"
-          value={nome}
+          value={nomePet}
           onChange={(e) => setNome(e.target.value)}
           className="w-full p-2 border border-gray-300 rounded"
         />
@@ -123,16 +131,16 @@ export const CadastroPet: React.FC = () => {
         </select>
       </div>
 
-      <div className="mb-4">
+      {/*<div className="mb-4">
         <label className="block text-sm font-medium mb-1">Foto:</label>
         <input
           type="file"
           onChange={(e) => setFoto(e.target.files ? e.target.files[0] : null)}
           className="w-full p-2 border border-gray-300 rounded"
         />
-      </div>
+      </div>*/}
 
-      <div className="mb-4">
+      {/*<div className="mb-4">
         <label className="block text-sm font-medium mb-1">Vacinas:</label>
         <div className="flex">
           <input
@@ -152,7 +160,7 @@ export const CadastroPet: React.FC = () => {
             <li key={index} className="text-sm">{vacina}</li>
           ))}
         </ul>
-      </div>
+      </div>*/}
 
       <button
         onClick={handleCadastro}
