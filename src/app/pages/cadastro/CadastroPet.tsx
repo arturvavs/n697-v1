@@ -45,9 +45,14 @@ export const CadastroPet: React.FC = () => {
       await Pet.save();
       alert('Pet cadastrado com sucesso!');
     } catch (err) {
-      alert(`Erro ao cadastrar pet`);
-      console.log(Parse.User.current())
+      if (err instanceof Error) {
+        alert(`Erro ao cadastrar pet: ${err.message}`);
+      } else {
+        alert('Erro desconhecido ao cadastrar pet.');
+      }
+      console.log(Parse.User.current());
     }
+    
   };
 
   {/*const handleAddVacina = (vacina: string) => {
