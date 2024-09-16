@@ -1,5 +1,6 @@
 import Parse from "parse/dist/parse.min.js";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Table,
   TableHead,
@@ -16,10 +17,16 @@ import {
   AppBar,
   Toolbar,
   IconButton,
-  Checkbox
+  Checkbox,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  TextField,
+  DialogActions
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import { CheckBox } from "@mui/icons-material";
+import EditIcon from "@mui/icons-material/Edit";
 
 export const UserPager: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -27,6 +34,9 @@ export const UserPager: React.FC = () => {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [pets, setPets] = useState<any[]>([]);
   const [selectedPets, setSelectedPets] = useState<string[]>([]);
+  const [openEditModal, setOpenEditModal] = useState(false);
+  const [currentPet, setCurrentPet] = useState<any>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPets = async () => {
@@ -88,6 +98,12 @@ export const UserPager: React.FC = () => {
     }
   };
   const deleteSelectedPets = async () => {
+
+    if (selectedPets.length === 0) {
+      alert("Por favor, selecione pelo menos um pet para deletar.");
+      return;
+    }
+
     try {
       const Pet = Parse.Object.extend("Pet");
       const query = new Parse.Query(Pet);
@@ -98,7 +114,7 @@ export const UserPager: React.FC = () => {
         pet.set("objectId", petId); // Define o ID do pet a ser deletado
         return pet;
       });
-  
+      
       await Parse.Object.destroyAll(petsToDelete);
       alert("Pets deletados com sucesso!");
   
@@ -146,6 +162,44 @@ export const UserPager: React.FC = () => {
 
   const handleLogout = async (e: React.FormEvent) => {
     Parse.User.logOut();
+    navigate("/");
+  };
+
+  const handleEditPet = (pet: any) => {
+    setCurrentPet(pet);
+    setOpenEditModal(true); // Abrir o modal de edição
+  };
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCurrentPet({ ...currentPet, [e.target.name]: e.target.value });
+  };
+
+  const handleEditSubmit = async () => {
+    try {
+      const Pet = Parse.Object.extend("Pet");
+      const query = new Parse.Query(Pet);
+      const petToUpdate = await query.get(currentPet.id);
+
+      petToUpdate.set("nomePet", currentPet.nomePet);
+      petToUpdate.set("idadePet", currentPet.idadePet);
+      petToUpdate.set("escpeciePet", currentPet.escpeciePet);
+      petToUpdate.set("racaPet", currentPet.racaPet);
+      petToUpdate.set("pesoPet", parseFloat(currentPet.pesoPet));
+      petToUpdate.set("sexoPet", currentPet.sexoPet);
+
+      await petToUpdate.save();
+
+      // Atualiza o estado dos pets
+      setPets((prevPets) =>
+        prevPets.map((pet) => (pet.id === currentPet.id ? currentPet : pet))
+      );
+
+      setOpenEditModal(false);
+      alert("Pet atualizado com sucesso!");
+    } catch (error) {
+      console.error("Erro ao editar pet:", error);
+      alert("Erro ao editar pet.");
+    }
   };
 
   return (
@@ -258,6 +312,7 @@ export const UserPager: React.FC = () => {
                   </TableSortLabel>
                 </TableCell>
                 <TableCell>Sexo</TableCell>
+                <TableCell>Opções</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -270,9 +325,14 @@ export const UserPager: React.FC = () => {
                     <TableCell>{pet.racaPet}</TableCell>
                     <TableCell>{pet.pesoPet}</TableCell>
                     <TableCell>
-                      {pet.dataNascimentoPet?.toLocaleDateString()}
+                    {new Date(pet.dataNascimentoPet).toLocaleDateString()}
                     </TableCell>
                     <TableCell>{pet.sexoPet}</TableCell>
+                    <TableCell>
+                    <IconButton onClick={() => handleEditPet(pet)}>
+                      <EditIcon />
+                    </IconButton>
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
@@ -286,6 +346,21 @@ export const UserPager: React.FC = () => {
           </Table>
         </TableContainer>
       </div>
+      <Dialog open={openEditModal} onClose={() => setOpenEditModal(false)}>
+        <DialogTitle>Editar Pet</DialogTitle>
+        <DialogContent>
+          <DialogContentText>Altere as características do pet abaixo.</DialogContentText>
+          <TextField margin="dense" label="Nome" name="nomePet" value={currentPet?.nomePet} onChange={handleEditChange} fullWidth />
+          <TextField margin="dense" label="Espécie" name="escpeciePet" value={currentPet?.escpeciePet} onChange={handleEditChange} fullWidth />
+          <TextField margin="dense" label="Raça" name="racaPet" value={currentPet?.racaPet} onChange={handleEditChange} fullWidth />
+          <TextField margin="dense" label="Peso" name="pesoPet" value={currentPet?.pesoPet} onChange={handleEditChange} fullWidth />
+          <TextField margin="dense" label="Sexo" name="sexoPet" value={currentPet?.sexoPet} onChange={handleEditChange} fullWidth />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenEditModal(false)} color="primary">Cancelar</Button>
+          <Button onClick={handleEditSubmit} color="primary">Salvar</Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

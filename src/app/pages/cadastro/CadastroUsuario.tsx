@@ -14,6 +14,7 @@ export const CadastroUsuario: React.FC = () => {
     const [nrTelefone, setTelefone] = useState('');
     const [nomeEndereco, setEndereco] = useState('');
     const [numeroEndereco, setNumeroEndereco] = useState('');
+    const navigate = useNavigate();
 
     const handleCadastro = async () => {
         const user = new Parse.User();
@@ -30,6 +31,8 @@ export const CadastroUsuario: React.FC = () => {
         try {
         await user.signUp();
         alert('Usuário cadastrado com sucesso!');
+        navigate('/');
+
         } catch (err) {
         alert(`Erro ao cadastrar usuário:`);
         }
