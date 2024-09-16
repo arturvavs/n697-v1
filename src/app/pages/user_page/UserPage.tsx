@@ -27,8 +27,6 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import EditIcon from "@mui/icons-material/Edit";
-import { CheckBox } from "@mui/icons-material";
-import DeleteIcon from "@mui/icons-material/Delete";
 
 export const UserPager: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
